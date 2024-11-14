@@ -2,6 +2,7 @@ package auth
 
 import (
 	"time"
+	"url-shortner/src/url"
 
 	"gorm.io/gorm"
 )
@@ -14,4 +15,6 @@ type User struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
+
+	URLs []url.URL `gorm:"foreignKey:UserId"`
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"url-shortner/src/auth"
+	"url-shortner/src/url"
 	"url-shortner/util"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +16,7 @@ func main() {
 		log.Fatalf("Could not connect to the database: %v", err)
 	}
 
-	util.DB.AutoMigrate(&auth.User{})
+	util.DB.AutoMigrate(&auth.User{}, &url.URL{})
 
 	router := gin.Default()
 
