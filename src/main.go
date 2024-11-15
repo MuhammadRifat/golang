@@ -22,6 +22,7 @@ func main() {
 
 	// Register auth routes
 	auth.RegisterAuthRoutes(router)
+	url.RegisterUrlRoutes(router)
 
 	router.Run(":3000")
 }
