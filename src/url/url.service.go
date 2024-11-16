@@ -12,12 +12,13 @@ var UrlService = UrlServiceStruct{}
 func (s *UrlServiceStruct) Create(urlDto URLDto) (URL, error) {
 
 	var url URL
+	var newId uint32 = 1
 	err := util.DB.Last(&url).Error
-	if err != nil {
-		return URL{}, err
+	if err == nil {
+		newId = url.ID + 1
 	}
 
-	code := toBase62(int64(url.ID + 1))
+	code := toBase62(int64(newId))
 	newUrl := URL{
 		OriginalUrl: urlDto.OriginalUrl,
 		UserId:      uint32(urlDto.UserId),
