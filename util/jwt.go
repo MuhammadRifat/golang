@@ -3,14 +3,13 @@ package util
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
-
-var jwtSecret = []byte("test-secret-key")
 
 // CustomClaims will hold additional claims you want to add to the JWT
 type CustomClaims struct {
@@ -19,6 +18,9 @@ type CustomClaims struct {
 }
 
 func GenerateJWT(id int) (string, error) {
+	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
+	fmt.Println(jwtSecret)
+
 	// Set the expiration time for the token
 	expirationTime := time.Now().Add(24 * time.Hour) // 1 day expiration
 
@@ -59,6 +61,7 @@ func JwtAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		jwtSecret := []byte(os.Getenv("JWT_SECRET"))
 		token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
