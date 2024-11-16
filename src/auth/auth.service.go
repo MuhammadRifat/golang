@@ -24,7 +24,7 @@ func (s *AuthServiceStruct) Login(request LoginRequest) (string, error) {
 		return "", errors.New("invalid email or password")
 	}
 
-	token, err := util.GenerateJWT(request.Email)
+	token, err := util.GenerateJWT(int(user.ID))
 	if err != nil {
 		return "", errors.New("error generating jwt")
 	}

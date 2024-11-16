@@ -1,8 +1,12 @@
 package util
 
 import (
+	"fmt"
+	"net/http"
+	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -10,17 +14,17 @@ var jwtSecret = []byte("test-secret-key")
 
 // CustomClaims will hold additional claims you want to add to the JWT
 type CustomClaims struct {
-	Username string `json:"username"`
+	ID int `json:"id"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(username string) (string, error) {
+func GenerateJWT(id int) (string, error) {
 	// Set the expiration time for the token
 	expirationTime := time.Now().Add(24 * time.Hour) // 1 day expiration
 
 	// Define the claims
 	claims := &CustomClaims{
-		Username: username,
+		ID: id,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			Issuer:    "URL Shortner",
@@ -37,4 +41,43 @@ func GenerateJWT(username string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func JwtAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
+			c.Abort()
+			return
+		}
+
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		if tokenString == authHeader {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization format is incorrect"})
+			c.Abort()
+			return
+		}
+
+		token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return jwtSecret, nil
+		})
+
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			c.Abort()
+			return
+		}
+
+		if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
+			c.Set("userId", claims.ID)
+			c.Next()
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			c.Abort()
+		}
+	}
 }

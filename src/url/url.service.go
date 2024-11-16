@@ -10,6 +10,7 @@ type UrlServiceStruct struct{}
 var UrlService = UrlServiceStruct{}
 
 func (s *UrlServiceStruct) Create(urlDto URLDto) (URL, error) {
+
 	var url URL
 	err := util.DB.Last(&url).Error
 	if err != nil {
@@ -19,7 +20,7 @@ func (s *UrlServiceStruct) Create(urlDto URLDto) (URL, error) {
 	code := toBase62(int64(url.ID + 1))
 	newUrl := URL{
 		OriginalUrl: urlDto.OriginalUrl,
-		UserId:      1,
+		UserId:      uint32(urlDto.UserId),
 		Code:        code,
 	}
 
@@ -38,6 +39,21 @@ func (s *UrlServiceStruct) FindOneById(id int) (URL, error) {
 		"Code",
 		"CreatedAt",
 	).Where("id = ?", id).First(&url).Error
+	if err != nil {
+		return URL{}, err
+	}
+
+	return url, nil
+}
+
+func (s *UrlServiceStruct) FindOneByCode(code string) (URL, error) {
+	var url URL
+	err := util.DB.Select(
+		"ID",
+		"OriginalUrl",
+		"Code",
+		"CreatedAt",
+	).Where("code = ?", code).First(&url).Error
 	if err != nil {
 		return URL{}, err
 	}
