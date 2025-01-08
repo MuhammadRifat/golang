@@ -2,21 +2,22 @@ package url
 
 import (
 	"strings"
+	common "url-shortner/src/common"
 	"url-shortner/src/util"
 )
 
-type UrlServiceStruct struct{}
+type UrlServiceStruct struct {
+	common.ServiceStruct[URL]
+}
 
-var UrlService = UrlServiceStruct{}
+var UrlService = UrlServiceStruct{
+	ServiceStruct: common.ServiceStruct[URL]{},
+}
 
-func (s *UrlServiceStruct) Create(urlDto URLDto) (URL, error) {
-
-	var url URL
-	var newId uint32 = 1
-	err := util.DB.Last(&url).Error
-	if err == nil {
-		newId = url.ID + 1
-	}
+// create url
+func (s *UrlServiceStruct) CreateUrl(urlDto URLDto) (URL, error) {
+	lastUrl, _ := s.FindLastRecord()
+	var newId = lastUrl.ID + 1
 
 	code := toBase62(int64(newId))
 	newUrl := URL{
@@ -25,29 +26,22 @@ func (s *UrlServiceStruct) Create(urlDto URLDto) (URL, error) {
 		Code:        code,
 	}
 
-	if err := util.DB.Create(&newUrl).Error; err != nil {
-		return URL{}, err
-	}
-
-	return newUrl, nil
+	err := s.CreateOneRecord(&newUrl)
+	return newUrl, err
 }
 
-func (s *UrlServiceStruct) FindOneById(id int) (URL, error) {
-	var url URL
-	err := util.DB.Select(
-		"ID",
-		"OriginalUrl",
-		"Code",
-		"CreatedAt",
-	).Where("id = ?", id).First(&url).Error
-	if err != nil {
-		return URL{}, err
-	}
+// find url by id
+func (s *UrlServiceStruct) FindUrlById(id int) (URL, error) {
+	url, _ := s.FindOneRecordById(id)
 
+	if url.ID == 0 {
+		return URL{}, util.NotFoundErr("url not found")
+	}
 	return url, nil
 }
 
-func (s *UrlServiceStruct) FindOneByCode(code string) (URL, error) {
+// find url by code
+func (s *UrlServiceStruct) FindUrlByCode(code string) (URL, error) {
 	var url URL
 	err := util.DB.Select(
 		"ID",
@@ -62,7 +56,7 @@ func (s *UrlServiceStruct) FindOneByCode(code string) (URL, error) {
 	return url, nil
 }
 
-func (s *UrlServiceStruct) FindAll() ([]URL, error) {
+func (s *UrlServiceStruct) FindAllUrls() ([]URL, error) {
 	var urls []URL
 	err := util.DB.Select(
 		"ID",

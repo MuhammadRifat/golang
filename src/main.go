@@ -30,6 +30,7 @@ func main() {
 	util.DB.AutoMigrate(&auth.User{}, &url.URL{})
 
 	router := gin.Default()
+	router.Use(util.GlobalErrorHandler())
 
 	// Register routes
 	auth.RegisterAuthRoutes(router)

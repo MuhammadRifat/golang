@@ -6,7 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func LoginHandler(ctx *gin.Context) {
+type AuthControllerStruct struct{}
+
+var AuthController = AuthControllerStruct{}
+
+func (c *AuthControllerStruct) LoginHandler(ctx *gin.Context) {
 	var loginRequest LoginRequest
 	if err := ctx.ShouldBindJSON(&loginRequest); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -23,7 +27,7 @@ func LoginHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"token": token})
 }
 
-func RegisterHandler(ctx *gin.Context) {
+func (c *AuthControllerStruct) RegisterHandler(ctx *gin.Context) {
 	var registerRequest RegisterRequest
 	if err := ctx.ShouldBindJSON(&registerRequest); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

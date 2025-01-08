@@ -3,6 +3,7 @@ package url
 import (
 	"net/http"
 	"strconv"
+	"url-shortner/src/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,24 +15,23 @@ var UrlController = UrlControllerStruct{}
 func (c *UrlControllerStruct) CreateHandler(ctx *gin.Context) {
 	userId, exists := ctx.Get("userId")
 	if !exists {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
+		ctx.Error(util.UnauthorizedErr())
 		return
 	}
 
 	var urlDto URLDto
 	if err := ctx.ShouldBindJSON(&urlDto); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(util.ValidationErr(err))
 		return
 	}
 	userIdInt, ok := userId.(int)
 	if !ok {
-
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is not a string"})
+		ctx.Error(util.BadRequestErr("userId must be a integer"))
 		return
 	}
 
 	urlDto.UserId = userIdInt
-	user, err := UrlService.Create(urlDto)
+	user, err := UrlService.CreateUrl(urlDto)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -48,7 +48,7 @@ func (c *UrlControllerStruct) FindOneHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
-	url, err := UrlService.FindOneById(id)
+	url, err := UrlService.FindUrlById(id)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -60,9 +60,9 @@ func (c *UrlControllerStruct) FindOneHandler(ctx *gin.Context) {
 func (c *UrlControllerStruct) RedirectHandler(ctx *gin.Context) {
 	code := ctx.Param("code")
 
-	url, err := UrlService.FindOneByCode(code)
+	url, err := UrlService.FindUrlByCode(code)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 
@@ -70,9 +70,9 @@ func (c *UrlControllerStruct) RedirectHandler(ctx *gin.Context) {
 }
 
 func (c *UrlControllerStruct) FindAllHandler(ctx *gin.Context) {
-	urls, err := UrlService.FindAll()
+	urls, err := UrlService.FindAllUrls()
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 
