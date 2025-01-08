@@ -30,14 +30,14 @@ func (c *UrlControllerStruct) CreateHandler(ctx *gin.Context) {
 		return
 	}
 
-	urlDto.UserId = userIdInt
+	urlDto.UserID = userIdInt
 	user, err := UrlService.CreateUrl(urlDto)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	ctx.AbortWithStatusJSON(util.ResponseCreated(user))
 }
 
 func (c *UrlControllerStruct) FindOneHandler(ctx *gin.Context) {
@@ -45,16 +45,16 @@ func (c *UrlControllerStruct) FindOneHandler(ctx *gin.Context) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 	url, err := UrlService.FindUrlById(id)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, url)
+	ctx.AbortWithStatusJSON(http.StatusOK, url)
 }
 
 func (c *UrlControllerStruct) RedirectHandler(ctx *gin.Context) {
@@ -76,5 +76,5 @@ func (c *UrlControllerStruct) FindAllHandler(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, urls)
+	ctx.AbortWithStatusJSON(http.StatusOK, urls)
 }

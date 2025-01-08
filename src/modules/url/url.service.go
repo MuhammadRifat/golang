@@ -22,7 +22,7 @@ func (s *UrlServiceStruct) CreateUrl(urlDto URLDto) (URL, error) {
 	code := toBase62(int64(newId))
 	newUrl := URL{
 		OriginalUrl: urlDto.OriginalUrl,
-		UserId:      uint32(urlDto.UserId),
+		UserID:      uint32(urlDto.UserID),
 		Code:        code,
 	}
 

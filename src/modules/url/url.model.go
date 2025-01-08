@@ -1,17 +1,15 @@
 package url
 
 import (
-	"time"
+	auth "url-shortner/src/modules/auth"
 
 	"gorm.io/gorm"
 )
 
 type URL struct {
-	ID          uint32 `gorm:"primaryKey"`
-	UserId      uint32 `gorm:"index"`
-	OriginalUrl string `gorm:"type:varchar(120); not null;"`
-	Code        string `gorm:"type:varchar(10); not null;index"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	gorm.Model
+	UserID      uint32
+	User        auth.User `gorm:"foreignKey:UserID"`
+	OriginalUrl string    `gorm:"type:varchar(120); not null;"`
+	Code        string    `gorm:"type:varchar(10); not null;index"`
 }
