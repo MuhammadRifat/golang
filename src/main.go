@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 	"os"
-	"url-shortner/src/auth"
-	"url-shortner/src/url"
-	"url-shortner/util"
+	"url-shortner/src/modules/auth"
+	"url-shortner/src/modules/url"
+	"url-shortner/src/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
