@@ -17,6 +17,13 @@ func (s *ServiceStruct[T]) FindOneRecordById(id int) (T, error) {
 	return data, err
 }
 
+func (s *ServiceStruct[T]) FindOneRecordByQuery(queryMap map[string]interface{}) (T, error) {
+	var data T
+	err := util.DB.Where(queryMap).First(&data).Error
+
+	return data, err
+}
+
 func (s *ServiceStruct[T]) FindLastRecord() (T, error) {
 	var data T
 	err := util.DB.Last(&data).Error
