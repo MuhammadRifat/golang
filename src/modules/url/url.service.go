@@ -43,12 +43,7 @@ func (s *UrlServiceStruct) FindUrlById(id int) (URL, error) {
 // find url by code
 func (s *UrlServiceStruct) FindUrlByCode(code string) (URL, error) {
 	var url URL
-	err := util.DB.Select(
-		"ID",
-		"OriginalUrl",
-		"Code",
-		"CreatedAt",
-	).Where("code = ?", code).First(&url).Error
+	err := util.DB.Where("code = ?", code).First(&url).Error
 	if err != nil {
 		return URL{}, err
 	}
@@ -57,14 +52,7 @@ func (s *UrlServiceStruct) FindUrlByCode(code string) (URL, error) {
 }
 
 func (s *UrlServiceStruct) FindAllUrls() ([]URL, error) {
-	var urls []URL
-	err := util.DB.Select(
-		"ID",
-		"UserId",
-		"OriginalUrl",
-		"Code",
-		"CreatedAt",
-	).Find(&urls).Error
+	urls, err := s.FindAllRecords()
 
 	if err != nil {
 		return []URL{}, err
@@ -72,6 +60,21 @@ func (s *UrlServiceStruct) FindAllUrls() ([]URL, error) {
 
 	return urls, nil
 }
+
+func (s *UrlServiceStruct) DeleteUrl(id int) error {
+	return s.DeleteOneRecordById(id)
+}
+
+// func (s *UrlServiceStruct) UpdateUrl(id int, urlDto URLDto) error {
+// 	existingUrl, _ := s.FindOneRecordById(id);
+// 	if existingUrl.ID == 0 {
+// 		return util.NotFoundErr("url not found");
+// 	}
+// 	if(urlDto.OriginalUrl) {
+// 		existingUrl.OriginalUrl = urlDto.OriginalUrl
+// 	}
+// 	return s.UpdateOneRecordById(id, urlDto)
+// }
 
 // Convert an integer to a Base62 encoded string
 func toBase62(num int64) string {
